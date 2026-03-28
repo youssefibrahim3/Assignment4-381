@@ -23,6 +23,5 @@ const reviews = [
         review: "Some of the best ice cream I've had. Will be coming back",
         rating: 5
     },
-    // Add 3 more reviews...
 ];
 export default reviews;

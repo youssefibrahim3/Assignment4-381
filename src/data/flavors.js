@@ -79,6 +79,5 @@ const flavors = [
         duration: "8 weeks",
         image: "images/vanilla.jpg"
     },
-    // Add 9 more flavors...
 ];
 export default flavors;
