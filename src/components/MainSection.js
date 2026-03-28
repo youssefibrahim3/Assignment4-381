@@ -1,10 +1,19 @@
 
 import React from 'react'
 import { useEffect } from 'react';
-
+import flavors from '../data/flavors.js'
+import reviews from '../data/reviews.js'
 function MainSection()
 {
-    useEffect();
+    useEffect(() => {
+        const randomFlavor1 = flavors[Math.floor(Math.random() * flavors.length)];
+        const randomFlavor2 = flavors[Math.floor(Math.random() * flavors.length)];
+        const randomFlavor3 = flavors[Math.floor(Math.random() * flavors.length)];
+
+        const randomReview = reviews[Math.floor(Math.random() * reviews.length)];
+        const randomReview2 = reviews[Math.floor(Math.random() * reviews.length)]
+
+    }, []);
     return (
         <div className="main-section">
             <h1>About Sweet Scoop Ice Cream</h1>

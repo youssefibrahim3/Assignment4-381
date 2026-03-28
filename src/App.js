@@ -1,9 +1,9 @@
 import logo from './logo.svg';
 import './App.css';
-import MainSection from './components/MainSection'
+import HomePage from './components/HomePage'
 function App() {
   return (
-    <MainSection/>
+    <HomePage/>
   );
 }
 
