@@ -33,16 +33,16 @@ const flavors = [
     },
     {
         id: 5,
-        name: "Vanilla Nightmare",
-        price: "$4.99",
-        description: " Classic creamy vanilla ice cream made with fresh ingredients. But it's evil",
+        name: "Coffee Buzz",
+        price: "$5.49",
+        description: " Bold coffee ice cream made for espresso lovers.",
         duration: "8 weeks",
         image: "images/vanilla.jpg"
     },
     {
         id: 6,
         name: "Mint Deluxe",
-        price: "$4.99",
+        price: "$5.99",
         description: " A super-sized Mint Chocolate Chip!",
         duration: "8 weeks",
         image: "images/mint.jpg"
@@ -65,16 +65,16 @@ const flavors = [
     },
     {
         id: 9,
-        name: "Rocky Road",
-        price: "$4.99",
-        description: " Classic chocolate ice cream packed with nuts and marshmallows.",
+        name: "Rocky Road Rush",
+        price: "$5.99",
+        description: " Chocolate ice cream mixed with marshmallows and almonds.",
         duration: "8 weeks",
         image: "images/chocolate.jpg"
     },
     {
         id: 10,
         name: "Neopolitan",
-        price: "$4.99",
+        price: "$5.49",
         description: " A mix of strawberry, chocolate, and vanilla flavours!",
         duration: "8 weeks",
         image: "images/vanilla.jpg"

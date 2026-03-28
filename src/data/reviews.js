@@ -12,16 +12,16 @@ const reviews = [
         rating: 2
     },
     {
-        customerName: "Tim Burger",
+        customerName: "Sofia Martinez",
         flavorName: " Strawberry Bliss",
-        review: "Great ice cream. Wish it was a bit cheaper though.",
-        rating: 4
+        review: "The ice cream was delicious and very creamy!",
+        rating: 5
     },
     {
-        customerName: "Johnny Ice",
-        flavorName: " Mint Chocolate Chip",
-        review: "Some of the best ice cream I've had. Will be coming back",
-        rating: 5
+        customerName: "Michael Chen",
+        flavorName: " Chocolate Fudge Swirl",
+        review: "Rich chocolate flavor and the texture was perfectly smooth.",
+        rating: 4
     },
 ];
 export default reviews;

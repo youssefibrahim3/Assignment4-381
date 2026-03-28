@@ -7,11 +7,11 @@ import MainSection from "./MainSection.js"
 function HomePage()
 {
     return (
-        <main>
+        <div>
             <Header/>
             <MainSection/>
             <Footer/>
-        </main>
+        </div>
     );
 }
 export default HomePage;
