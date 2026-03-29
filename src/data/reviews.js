@@ -6,7 +6,7 @@ const reviews = [
         rating: 5
     },
     {
-        customerName: "Yharim Yharon",
+        customerName: "Mark Grayson",
         flavorName: " Chocolate Fudge Swirl",
         review: "I didn't like it that much.",
         rating: 2

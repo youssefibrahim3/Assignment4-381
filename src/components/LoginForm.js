@@ -55,7 +55,7 @@ function LoginForm()
 
         const foundUser = users.find(
             (user) =>
-                user.username === username && user.email === password
+                user.username.toLowerCase() === username.toLowerCase() && user.email === password
         )
         if (foundUser)
         {
