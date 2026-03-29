@@ -5,19 +5,16 @@ import {Link} from 'react-router-dom'
 function Header()
 {
     return (
-
         <header>
-            <div>
+            <div className='header-top'>
                 <img src="images/logo.jpg" alt="Sweet Scoop Ice Cream Logo"/>
+                <h1>Sweet Scoop Ice Cream</h1>
             </div>
-            <div>
-                <h3>Sweet Scoop Ice Cream</h3>
-            </div>
-            <div className="navbar">
+
+            <div className='navbar'>
                 <Link to="/">Home</Link>
                 <Link to="/flavors">Flavors</Link>
                 <Link to="/login">Login</Link>
-
             </div>  
         </header>
     );
