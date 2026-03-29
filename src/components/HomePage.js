@@ -1,8 +1,8 @@
 
 import React from 'react'
-import Footer from "./footer.js"
-import Header from "./header.js"
 import MainSection from "./MainSection.js"
+import Header from "./header.js"
+import Footer from "./footer.js"
 
 function HomePage()
 {

@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 
-// 1. Add 'onAdd' here so the component receives the function
 const IceCreamCard = ({ flavor, onAdd }) => { 
   const [showDescription, setShowDescription] = useState(false);
 
-  // REMOVED the nested 'const FlavorItem' function that was here
 
   return (
     <div 
-      className="flavor-card" // Ensure this matches your CSS (either flavor-card or flavorcard)
+      className="flavor-card"
       onMouseEnter={() => setShowDescription(true)}
       onMouseLeave={() => setShowDescription(false)}
       style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '8px', width: '250px' }}
