@@ -1,3 +1,7 @@
+// Group Members:
+// 1. Youssef Ibrahim (UCID: 30245637)
+// 2. Alexander Gamble (UCID: 30194498)
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
