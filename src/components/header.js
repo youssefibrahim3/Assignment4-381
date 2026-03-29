@@ -7,7 +7,7 @@ function Header()
     return (
         <header>
             <div className='header-top'>
-                <img src="images/logo.jpg" alt="Sweet Scoop Ice Cream Logo"/>
+                <img src="/images/logo.webp" alt="Sweet Scoop Ice Cream Logo" />
                 <h1>Sweet Scoop Ice Cream</h1>
             </div>
 

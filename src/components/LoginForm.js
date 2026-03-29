@@ -1,7 +1,6 @@
+import React, { useState, useEffect } from 'react'; // This covers everything
+import DisplayStatus from './DisplayStatus';
 
-import React from 'react'
-import {UseState, UseEffect} from 'react'
-import DisplayStatus from './DisplayStatus'
 function LoginForm()
 {
     const [username, setUsername] = useState("");
