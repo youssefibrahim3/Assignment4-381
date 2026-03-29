@@ -1,6 +1,6 @@
 
 import React from 'react'
-import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import {Link} from 'react-router-dom'
 
 function Header()
 {
@@ -14,9 +14,9 @@ function Header()
                 <h3>Sweet Scoop Ice Cream</h3>
             </div>
             <div className="navbar">
-                <a>Home</a>
-                <a>Flavors</a>
-                <a>Login</a>
+                <Link to="/">Home</Link>
+                <Link to="/flavors">Flavors</Link>
+                <Link to="/login">Login</Link>
 
             </div>  
         </header>
