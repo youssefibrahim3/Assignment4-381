@@ -1,8 +1,20 @@
 import React from 'react'; 
 import OrderItem from './OrderItem';
+import { useEffect } from 'react';
 
 const OrderList = ({ order, setOrder }) => {
-  
+
+  useEffect(() => {
+    const savedOrder = localStorage.getItem('order');
+    if (savedOrder) {
+      setOrder(JSON.parse(savedOrder));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('order', JSON.stringify(order));
+  }, [order]);
+
   const handleRemove = (id) => {
     setOrder(prevOrder => 
       prevOrder.reduce((acc, item) => {
