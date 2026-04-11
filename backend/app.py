@@ -2,11 +2,50 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import bcrypt
 import random
+import json
+
+with open("reviews.json", "r") as f:
+    reviews_data = json.load(f)
+with open("flavors.json", "r") as f:
+    flavors_data = json.load(f)
 
 app = Flask(__name__)
 CORS(app)
 
-users = []
+users = [
+    {
+        "id": 1,
+        "username": "sweet alice",
+        "email": "alice@example.com",
+        "password_hash": "2b$12$examplehashedvalue",
+        "cart": [
+            {
+                "flavorId": 2,
+                "name": "Chocolate Bliss",
+                "price": 5.49,
+                "quantity": 2
+            }
+        ],
+        "orders": [
+            {
+                "orderId": 1,
+                "items": [
+                    {
+                        "flavorId": 1,
+                        "name": "Vanilla Dream",
+                        "price": 4.99,
+                        "quantity": 1
+                    }
+                ],
+                "total": 4.99,
+                "timestamp": "2026-03-30 18:30:00"
+            }
+        ]
+    }
+]
+
+
+
 
 @app.route("/signup",methods=["POST"])
 def createUser():
@@ -129,7 +168,7 @@ def login():
             "message": "Invalid username or password."
         })
     
-    if bcrypt.checkpw(password, user_found["password"]):
+    if bcrypt.checkpw(password, user_found["password_hash"]):
         return jsonify({
             "success": True,
             "message": "Login successful.",
@@ -142,39 +181,227 @@ def login():
             "message": "Invalid username or password."
         })
 
+@app.route("/reviews", methods=["GET"])
+def getReviews():
+    reviews = reviews_data["reviews"]
+    length = len(reviews)
 
-
-@app.route("/flavors", methods=["GET"])
-def getFlavors():
-    length = len(reviews_list)
-
-    selected_reviews = [reviews_list[random.randrange(length)], reviews_list[random.randrange(length)]]
+    selected_reviews = [reviews[random.randrange(length)], reviews[random.randrange(length)]]
     return jsonify({
         "success": True,
         "message": "Reviews loaded.",
         "reviews": selected_reviews
     })
 
+@app.route("/flavors", methods=["GET"])
+def getFlavors():
+    return jsonify({
+        "success": True,
+        "message": "Flavors loaded.",
+        "flavors": flavors_data["flavors"]
+    })
+
+
+
 
 @app.route("/cart", methods=["GET"])
 def getCart():
-    pass
+    user_id = request.args.get("userId")
+    found_user = None
+
+    for user in users:
+        if user["id"] == int(user_id):
+            found_user = user
+            break
+
+    if found_user:
+        return jsonify({
+            "success": True,
+            "message": "Cart loaded.",
+            "cart": found_user["cart"]
+        })
+    else:
+        return jsonify({
+            "success": False,
+            "message": "User not found."
+        })
 
 @app.route("/cart", methods=["POST"])
 def addToCart():
-    pass
+    data = request.get_json()
+
+    user_id = data.get("userId")
+    flavor_id = data.get("flavorId")
+
+    found_user = None
+    found_flavor = None
+
+    for user in users:
+        if user["id"] == int(user_id):
+            found_user = user
+            break
+    
+    if not found_user:
+        return jsonify({
+            "success": False,
+            "message": "User not found."
+        })
+    
+    for flavor in flavors_data["flavors"]:
+        if flavor["id"] == flavor_id:
+            found_flavor = flavor
+            break
+
+    if not found_flavor:
+        return jsonify({
+            "success": False,
+            "message": "Flavor not found."
+        })
+    
+    for item in found_user["cart"]:
+        if item["flavorId"] == flavor_id:
+            return jsonify({
+                "success": False,
+                "message": "Item already exists in cart. Please use 'PUT /cart' to update quantity instead."
+            })
+
+    found_user["cart"].append({
+        "flavorId": flavor_id,
+        "name": found_flavor["name"],
+        "price": found_flavor["price"],
+        "quantity": 1
+    })
+
+    return jsonify({
+        "success": True,
+        "message": "Flavor added to cart.",
+        "cart": found_user["cart"]
+    })
 
 @app.route("/cart", methods=["PUT"])
 def updateCartQuantity():
-    pass
+    data = request.get_json()
+
+    user_id = data.get("userId")
+    flavor_id = data.get("flavorId")
+    quantity = data.get("quantity")
+
+    found_user = None
+    found_flavor = None
+
+    if int(quantity) < 1:
+        return jsonify({
+            "success": False,
+            "message": "Quantity must be 1 or above"
+        })
+
+    for user in users:
+        if user["id"] == int(user_id):
+            found_user = user
+            break
+    
+    if not found_user:
+        return jsonify({
+            "success": False,
+            "message": "User not found."
+        })
+    
+    for flavor in found_user["cart"]:
+        if flavor["id"] == flavor_id:
+            found_flavor = flavor
+            break
+
+    if not found_flavor:
+        return jsonify({
+            "success": False,
+            "message": "Flavor does not exist in user's cart."
+        })
+    
+    found_flavor["quantity"] = quantity
+
+    return jsonify({
+        "success": True,
+        "message": "Cart updated successfully.",
+        "cart": found_user["cart"]
+    })
 
 @app.route("/cart", methods=["DELETE"])
 def deleteCartItem():
-    pass
+    data = request.get_json()
+
+    user_id = data.get("userId")
+    flavor_id = data.get("flavorId")
+
+    found_user = None
+
+    for user in users:
+        if user["id"] == int(user_id):
+            found_user = user
+            break
+    
+    if not found_user:
+        return jsonify({
+            "success": False,
+            "message": "User not found."
+        })
+    
+    for flavor in found_user["cart"]:
+        if flavor["id"] == flavor_id:
+            del flavor
+            break
+
+    return jsonify({
+        "success": True,
+        "message": "Flavor removed from cart.",
+        "cart": found_user["cart"]
+    })
+
+
+
 
 @app.route("/orders", methods=["POST"])
 def placeOrder():
-    pass
+    data = request.get_json()
+
+    user_id = data.get("userId")
+
+    found_user = None
+
+    for user in users:
+        if user["id"] == int(user_id):
+            found_user = user
+            break
+    
+    if not found_user:
+        return jsonify({
+            "success": False,
+            "message": "User not found."
+        })
+    
+    if found_user["cart"] == []:
+        return jsonify({
+            "success": False,
+            "message": "Cannot place order with empty cart."
+        })    
+    
+    #orderId, total, timestamp
+    new_order = found_user["cart"]
+    found_user["cart"] = []
+
+    new_order["orderId"] = len(found_user["orders"]) + 1
+    new_order["total"] = 0
+    new_order["timestamp"] = "time"
+
+    for item in new_order:
+        new_order["total"] += item["price"] * item["quantity"]
+
+    found_user["orders"].append(new_order)
+    
+    return jsonify({
+        "success": True,
+        "message": "Order placed successfully.",
+        "orderId": new_order["orderId"]
+    })
 
 @app.route("/orders", methods=["GET"])
 def getOrders():
