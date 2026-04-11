@@ -307,7 +307,7 @@ def updateCartQuantity():
         })
     
     for flavor in found_user["cart"]:
-        if flavor["id"] == flavor_id:
+        if flavor["flavorId"] == flavor_id:
             found_flavor = flavor
             break
 
@@ -385,15 +385,19 @@ def placeOrder():
         })    
     
     #orderId, total, timestamp
-    new_order = found_user["cart"]
+    new_order = found_user["cart"].copy()
     found_user["cart"] = []
 
-    new_order["orderId"] = len(found_user["orders"]) + 1
-    new_order["total"] = 0
-    new_order["timestamp"] = "time"
-
+    total = 0
     for item in new_order:
-        new_order["total"] += item["price"] * item["quantity"]
+        total += item["price"] * item["quantity"]
+
+    new_order = {
+        "orderId": len(found_user["orders"]) + 1,
+        "items": new_order,
+        "total": total,
+        "timestamp": "2026-04-11 12:00:00"
+    }
 
     found_user["orders"].append(new_order)
     
