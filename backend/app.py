@@ -405,4 +405,22 @@ def placeOrder():
 
 @app.route("/orders", methods=["GET"])
 def getOrders():
-    pass
+    user_id = request.args.get("userId")
+    found_user = None
+
+    for user in users:
+        if user["id"] == int(user_id):
+            found_user = user
+            break
+
+    if found_user:
+        return jsonify({
+            "success": True,
+            "message": "Order history loaded.",
+            "orders": found_user["orders"]
+        })
+    else:
+        return jsonify({
+            "success": False,
+            "message": "User not found."
+        })
