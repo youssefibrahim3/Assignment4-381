@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import bcrypt
+
 import random
 import json
+from datetime import datetime
 
 with open("reviews.json", "r") as f:
     reviews_data = json.load(f)
@@ -345,9 +347,9 @@ def deleteCartItem():
             "message": "User not found."
         })
     
-    for flavor in found_user["cart"]:
-        if flavor["id"] == flavor_id:
-            del flavor
+    for i, item in enumerate(found_user["cart"]):
+        if item["flavorId"] == flavor_id:
+            del found_user["cart"][i]
             break
 
     return jsonify({
@@ -396,7 +398,7 @@ def placeOrder():
         "orderId": len(found_user["orders"]) + 1,
         "items": new_order,
         "total": total,
-        "timestamp": "2026-04-11 12:00:00"
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
     found_user["orders"].append(new_order)
