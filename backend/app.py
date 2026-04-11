@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import bcrypt
+import random
 
 app = Flask(__name__)
 CORS(app)
@@ -84,7 +85,7 @@ def createUser():
         })
 
     #hashing
-    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    password_hash = bcrypt.hashpw(password, bcrypt.gensalt())
 
     new_user = {
         "id": len(users) + 1,
@@ -101,3 +102,80 @@ def createUser():
         "success": True,
         "message": "Registration successful."
     })
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+
+    username = data.get("username")
+    password = data.get("password")
+
+    if not all([username, password]):
+        return jsonify({
+            "success": False,
+            "message": "Username and password are required."
+        })
+    
+    user_found = None
+    for user in users:
+        if user["username"] == username:
+            user_found = user
+            break
+
+    if user_found == None:
+        return jsonify({
+            "success": False,
+            "message": "Invalid username or password."
+        })
+    
+    if bcrypt.checkpw(password, user_found["password"]):
+        return jsonify({
+            "success": True,
+            "message": "Login successful.",
+            "userId": user_found["id"],
+            "username": user_found["username"]
+        })
+    else:
+        return jsonify({
+            "success": False,
+            "message": "Invalid username or password."
+        })
+
+
+
+@app.route("/flavors", methods=["GET"])
+def getFlavors():
+    length = len(reviews_list)
+
+    selected_reviews = [reviews_list[random.randrange(length)], reviews_list[random.randrange(length)]]
+    return jsonify({
+        "success": True,
+        "message": "Reviews loaded.",
+        "reviews": selected_reviews
+    })
+
+
+@app.route("/cart", methods=["GET"])
+def getCart():
+    pass
+
+@app.route("/cart", methods=["POST"])
+def addToCart():
+    pass
+
+@app.route("/cart", methods=["PUT"])
+def updateCartQuantity():
+    pass
+
+@app.route("/cart", methods=["DELETE"])
+def deleteCartItem():
+    pass
+
+@app.route("/orders", methods=["POST"])
+def placeOrder():
+    pass
+
+@app.route("/orders", methods=["GET"])
+def getOrders():
+    pass
