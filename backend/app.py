@@ -2,7 +2,12 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import bcrypt
 
-@app.route("/signup",method=["POST"])
+app = Flask(__name__)
+CORS(app)
+
+users = []
+
+@app.route("/signup",methods=["POST"])
 def createUser():
 
 
