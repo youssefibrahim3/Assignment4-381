@@ -1,51 +1,24 @@
 import React from 'react'; 
 import OrderItem from './OrderItem';
-import { useEffect } from 'react';
 
-const OrderList = ({ order, setOrder }) => {
+const OrderList = ({ order, onRemove, onPlaceOrder }) => {
+    const totalPrice = order.reduce((sum, item) => {
+        const price = typeof item.price === 'string' ? parseFloat(item.price.replace(/[^0-9.]/g, '')) : item.price;
+        return sum + (price * item.quantity);
+    }, 0);
 
-  useEffect(() => {
-    const savedOrder = localStorage.getItem('order');
-    if (savedOrder) {
-      setOrder(JSON.parse(savedOrder));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('order', JSON.stringify(order));
-  }, [order]);
-
-  const handleRemove = (id) => {
-    setOrder(prevOrder => 
-      prevOrder.reduce((acc, item) => {
-        if (item.id === id) {
-          if (item.quantity > 1) acc.push({ ...item, quantity: item.quantity - 1 });
-        } else {
-          acc.push(item);
-        }
-        return acc;
-      }, [])
+    return (
+        <div className="order-list">
+            <h2>Your Order</h2>
+            {order.map(item => (
+                <OrderItem key={item.flavorId} item={item} onRemove={() => onRemove(item.flavorId)} />
+            ))}
+            <div className="total">
+                <h3>Total: ${totalPrice.toFixed(2)}</h3>
+                <button onClick={onPlaceOrder} style={{ marginTop: '10px', padding: '10px 20px' }}>Place Order</button>
+            </div>
+        </div>
     );
-  };
-
-  const totalPrice = order.reduce((sum, item) => {
-    const numericPrice = typeof item.price === 'string' 
-      ? parseFloat(item.price.replace('$', '')) 
-      : item.price;
-    return sum + (numericPrice * item.quantity);
-  }, 0);
-
-  return (
-    <div className="order-list">
-      <h2>Your Order</h2>
-      {order.map(item => (
-        <OrderItem key={item.id} item={item} onRemove={handleRemove} />
-      ))}
-      <div className="total">
-        <h3>Total: ${totalPrice.toFixed(2)}</h3>
-      </div>
-    </div>
-  );
 };
 
 export default OrderList;

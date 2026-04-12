@@ -4,6 +4,7 @@ import bcrypt
 
 import random
 import json
+import re
 from datetime import datetime
 
 with open("reviews.json", "r") as f:
@@ -14,12 +15,28 @@ with open("flavors.json", "r") as f:
 app = Flask(__name__)
 CORS(app)
 
+
+def normalize_price(value):
+    if isinstance(value, str):
+        price_text = re.sub(r'[^0-9.]', '', value)
+        try:
+            return float(price_text)
+        except ValueError:
+            return 0.0
+    return float(value)
+
+
+def normalize_cart_item(item):
+    item = item.copy()
+    item['price'] = normalize_price(item.get('price', 0))
+    return item
+
 users = [
     {
         "id": 1,
         "username": "sweet alice",
         "email": "alice@example.com",
-        "password_hash": "2b$12$examplehashedvalue",
+        "password_hash": "$2b$12$4LP.XvB63vYVbKeNbq4XOumhPMq8RlCqRpqz8n48xDcgDZiePuL8S",
         "cart": [
             {
                 "flavorId": 2,
@@ -217,10 +234,11 @@ def getCart():
             break
 
     if found_user:
+        normalized_cart = [normalize_cart_item(item) for item in found_user["cart"]]
         return jsonify({
             "success": True,
             "message": "Cart loaded.",
-            "cart": found_user["cart"]
+            "cart": normalized_cart
         })
     else:
         return jsonify({
@@ -270,7 +288,7 @@ def addToCart():
     found_user["cart"].append({
         "flavorId": flavor_id,
         "name": found_flavor["name"],
-        "price": found_flavor["price"],
+        "price": normalize_price(found_flavor["price"]),
         "quantity": 1
     })
 
@@ -391,12 +409,16 @@ def placeOrder():
     found_user["cart"] = []
 
     total = 0
+    normalized_items = []
     for item in new_order:
+        item = item.copy()
+        item["price"] = normalize_price(item["price"])
+        normalized_items.append(item)
         total += item["price"] * item["quantity"]
 
     new_order = {
         "orderId": len(found_user["orders"]) + 1,
-        "items": new_order,
+        "items": normalized_items,
         "total": total,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
@@ -430,3 +452,6 @@ def getOrders():
             "success": False,
             "message": "User not found."
         })
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

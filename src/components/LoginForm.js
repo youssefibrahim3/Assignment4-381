@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react'; // This covers everything
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DisplayStatus from './DisplayStatus';
+import { API_BASE } from '../api';
 
 function LoginForm()
 {
@@ -7,30 +9,11 @@ function LoginForm()
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("");
-    const [users, setUsers] = useState([]);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        fetch("https://jsonplaceholder.typicode.com/users")
-            .then(res => res.json())
-            .then(data => setUsers(data))
-            .catch(() => {
-                setMessage("Error fetching users");
-                setMessageType("error");
-            });
-    }, []);
-
-    useEffect(() => {
-        if (messageType === "success")
-        {
-            setTimeout(() => {
-                window.location.href = "/flavors";
-            }, 2000);
-        }
-    }, [messageType]);
-
-    function handleSubmit(button)
+    function handleSubmit(e)
     {
-        button.preventDefault(); //apparently this prevents page refresh
+        e.preventDefault();
 
         if (!username)
         {
@@ -46,42 +29,53 @@ function LoginForm()
             return;
         }
 
-        if (password.length < 8)
-        {
-            setMessage("Password must be at least 8 characters.");
+        // Submit to backend
+        fetch(`${API_BASE}/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username,
+                password,
+            }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                setMessage(data.message);
+                setMessageType("success");
+                localStorage.setItem('userId', data.userId);
+                localStorage.setItem('username', data.username);
+                setTimeout(() => {
+                    navigate('/flavors');
+                }, 1000);
+            } else {
+                setMessage(data.message);
+                setMessageType("error");
+            }
+        })
+        .catch(() => {
+            setMessage("Error logging in.");
             setMessageType("error");
-            return;
-        }
-
-        const foundUser = users.find(
-            (user) =>
-                user.username.toLowerCase() === username.toLowerCase() && user.email === password
-        )
-        if (foundUser)
-        {
-            setMessage("Login successful!");
-            setMessageType("success");
-        } else {
-            setMessage("Invalid username or password");
-            setMessageType("error");
-        }
+        });
     }
 
     return (
         <div>
             <h1 style={{textAlign: 'center'}}>Login</h1>
             <form id="login_form">
-                <label for="username">Username</label><br/>
+                <label htmlFor="username">Username</label><br/>
                 <input type="text" id="username" name="username" 
-                onChange={(e) => setUsername(e.target.value)}/><br/><br/>
+                value={username} onChange={(e) => setUsername(e.target.value)}/><br/><br/>
 
-                <label for="password">Password (Email)</label><br/>
+                <label htmlFor="password">Password</label><br/>
                 <input type="password" id="password" name="password" 
-                onChange={(e) => setPassword(e.target.value)}/><br/><br/>
+                value={password} onChange={(e) => setPassword(e.target.value)}/><br/><br/>
 
                 <button type="submit" onClick={handleSubmit}>Login</button>
-                <br></br>
-                <a>Forgot Password?</a>
+                <br/>
+                <a href="#" onClick={() => navigate('/signup')}>Don't have an account? Signup</a>
                 {message && <DisplayStatus type={messageType} message={message} />}
             </form>
         </div>

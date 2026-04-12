@@ -1,32 +1,167 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FlavorCatalog from './FlavorCatalog';
 import OrderList from './OrderList';
 import Footer from './footer';
 import Header from './header';
+import { API_BASE } from '../api';
 
 function FlavorsPage() {
     const [order, setOrder] = useState([]);
-
-    // Move LocalStorage logic here so it persists for the whole page
-    useEffect(() => {
-        const savedOrder = localStorage.getItem('iceCreamOrder');
-        if (savedOrder) setOrder(JSON.parse(savedOrder));
-    }, []);
+    const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
-        localStorage.setItem('iceCreamOrder', JSON.stringify(order));
-    }, [order]);
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            navigate('/login');
+            return;
+        }
+
+        // Fetch cart from backend
+        fetch(`${API_BASE}/cart?userId=${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setOrder(data.cart);
+                } else {
+                    setMessage(data.message);
+                    setMessageType("error");
+                }
+            })
+            .catch(() => {
+                setMessage("Error loading cart.");
+                setMessageType("error");
+            });
+    }, [navigate]);
 
     // This function handles the "Add to Order" logic
     const handleAddToOrder = (flavor) => {
-        setOrder(prevOrder => {
-            const existingItem = prevOrder.find(item => item.id === flavor.id);
-            if (existingItem) {
-                return prevOrder.map(item =>
-                    item.id === flavor.id ? { ...item, quantity: item.quantity + 1 } : item
-                );
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            navigate('/login');
+            return;
+        }
+
+        // Check if flavor is already in cart
+        const existingItem = order.find(item => item.flavorId === flavor.id);
+        if (existingItem) {
+            // Update quantity
+            fetch(`${API_BASE}/cart`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: parseInt(userId),
+                    flavorId: flavor.id,
+                    quantity: existingItem.quantity + 1,
+                }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setOrder(data.cart);
+                } else {
+                    setMessage(data.message);
+                    setMessageType("error");
+                }
+            })
+            .catch(() => {
+                setMessage("Error updating cart.");
+                setMessageType("error");
+            });
+        } else {
+            // Add new item
+            fetch(`${API_BASE}/cart`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: parseInt(userId),
+                    flavorId: flavor.id,
+                }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setOrder(data.cart);
+                } else {
+                    setMessage(data.message);
+                    setMessageType("error");
+                }
+            })
+            .catch(() => {
+                setMessage("Error adding to cart.");
+                setMessageType("error");
+            });
+        }
+    };
+
+    const handleRemove = (flavorId) => {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            navigate('/login');
+            return;
+        }
+
+        fetch(`${API_BASE}/cart`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId: parseInt(userId),
+                flavorId: flavorId,
+            }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                setOrder(data.cart);
+            } else {
+                setMessage(data.message);
+                setMessageType("error");
             }
-            return [...prevOrder, { ...flavor, quantity: 1 }];
+        })
+        .catch(() => {
+            setMessage("Error removing from cart.");
+            setMessageType("error");
+        });
+    };
+
+    const handlePlaceOrder = () => {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            navigate('/login');
+            return;
+        }
+
+        fetch(`${API_BASE}/orders`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId: parseInt(userId),
+            }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                setMessage("Order placed successfully!");
+                setMessageType("success");
+                setOrder([]); // Clear local cart
+            } else {
+                setMessage(data.message);
+                setMessageType("error");
+            }
+        })
+        .catch(() => {
+            setMessage("Error placing order.");
+            setMessageType("error");
         });
     };
 
@@ -34,10 +169,9 @@ function FlavorsPage() {
         <div className="flavors-page">
             <Header />
             <div className="content">
-                {/* Pass the function to the Catalog */}
                 <FlavorCatalog onAdd={handleAddToOrder} />
-                {/* Pass the data to the List */}
-                <OrderList order={order} setOrder={setOrder} />
+                <OrderList order={order} onRemove={handleRemove} onPlaceOrder={handlePlaceOrder} />
+                {message && <div style={{ textAlign: 'center', margin: '10px', color: messageType === 'success' ? 'green' : 'red' }}>{message}</div>}
             </div>
             <Footer />
         </div>

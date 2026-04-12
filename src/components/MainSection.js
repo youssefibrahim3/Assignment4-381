@@ -1,29 +1,45 @@
+import React, { useEffect, useState } from 'react';
+import { API_BASE } from '../api';
 
-import React from 'react'
-import { useEffect, useState } from 'react';
-import flavors from '../data/flavors.js'
-import reviews from '../data/reviews.js'
-function MainSection()
-{
-
-    //  NOTE: The image on the assignment shows it displaying three customer reviews,
-    //  but the INSTRUCTIONS say to only display two customer reviews.
-
-    const [randomFlavor, setRandomFlavor] = useState(flavors[0]);
-    const [randomFlavor2, setRandomFlavor2] = useState(flavors[1]);
-    const [randomFlavor3, setRandomFlavor3] = useState(flavors[2]);
-
-    const [randomReview, setRandomReview] = useState(reviews[0]);
-    const [randomReview2, setRandomReview2] = useState(reviews[1]);
+function MainSection() {
+    const [flavors, setFlavors] = useState([]);
+    const [reviews, setReviews] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
-        setRandomFlavor(flavors[Math.floor(Math.random() * flavors.length)]);
-        setRandomFlavor2(flavors[Math.floor(Math.random() * flavors.length)]);
-        setRandomFlavor3(flavors[Math.floor(Math.random() * flavors.length)]);
-
-        setRandomReview(reviews[Math.floor(Math.random() * reviews.length)]);
-        setRandomReview2(reviews[Math.floor(Math.random() * reviews.length)]);
+        Promise.all([
+            fetch(`${API_BASE}/flavors`).then(res => res.json()),
+            fetch(`${API_BASE}/reviews`).then(res => res.json())
+        ])
+        .then(([flavorsData, reviewsData]) => {
+            if (flavorsData.success && reviewsData.success) {
+                // Get 3 random flavors
+                const allFlavors = flavorsData.flavors;
+                const selectedFlavors = [];
+                const usedIndices = new Set();
+                while (selectedFlavors.length < 3 && selectedFlavors.length < allFlavors.length) {
+                    const index = Math.floor(Math.random() * allFlavors.length);
+                    if (!usedIndices.has(index)) {
+                        usedIndices.add(index);
+                        selectedFlavors.push(allFlavors[index]);
+                    }
+                }
+                setFlavors(selectedFlavors);
+                setReviews(reviewsData.reviews);
+            } else {
+                setError("Error loading data.");
+            }
+            setLoading(false);
+        })
+        .catch(() => {
+            setError("Error loading data.");
+            setLoading(false);
+        });
     }, []);
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>{error}</div>;
 
     return (
         <div className="main-section">
@@ -36,38 +52,23 @@ function MainSection()
             </p>
             <h1>Featured flavors</h1>
             <div className='flavor-grid'>
-                <div className='flavor-card'>
-                    <h1>{randomFlavor.name}</h1>
-                    <p>{randomFlavor.description}</p>
-                    <p>Price: {randomFlavor.price}</p>
-                    <img src={randomFlavor.image}></img>
-                </div>
-                <div className='flavor-card'>
-                    <h1>{randomFlavor2.name}</h1>
-                    <p>{randomFlavor2.description}</p>
-                    <p>Price: {randomFlavor2.price}</p>
-                    <img src={randomFlavor2.image}></img>
-                </div>
-                <div className='flavor-card'>
-                    <h1>{randomFlavor3.name}</h1>
-                    <p>{randomFlavor3.description}</p>
-                    <p>Price: {randomFlavor3.price}</p>
-                    <img src={randomFlavor3.image}></img>
-                </div>
+                {flavors.map((flavor, index) => (
+                    <div key={index} className='flavor-card'>
+                        <h1>{flavor.name}</h1>
+                        <p>{flavor.description}</p>
+                        <p>Price: {flavor.price}</p>
+                        <img src={flavor.image} alt={flavor.name} />
+                    </div>
+                ))}
             </div>
             <h1>Customer Reviews</h1>
-            
-            <div>
-                <h1>{randomReview.customerName}</h1>
-                <p>Rating: {'★'.repeat(randomReview.rating) + '☆'.repeat(5 - randomReview.rating)}</p>
-                <p>{randomReview.review}</p>
-            </div>
-
-            <div>
-                <h1>{randomReview2.customerName}</h1>
-                <p>Rating: {'★'.repeat(randomReview2.rating) + '☆'.repeat(5 - randomReview2.rating)}</p>
-                <p>{randomReview2.review}</p>
-            </div>
+            {reviews.map((review, index) => (
+                <div key={index}>
+                    <h1>{review.customerName}</h1>
+                    <p>Rating: {'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}</p>
+                    <p>{review.review}</p>
+                </div>
+            ))}
         </div>
     );
 }
