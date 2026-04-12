@@ -126,7 +126,7 @@ def createUser():
         })
 
     #hashing
-    password_hash = bcrypt.hashpw(password, bcrypt.gensalt())
+    password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     new_user = {
         "id": len(users) + 1,
@@ -164,13 +164,13 @@ def login():
             user_found = user
             break
 
-    if user_found == None:
+    if user_found is None:
         return jsonify({
             "success": False,
             "message": "Invalid username or password."
         })
     
-    if bcrypt.checkpw(password, user_found["password_hash"]):
+    if bcrypt.checkpw(password.encode('utf-8'), user_found["password_hash"].encode('utf-8')):
         return jsonify({
             "success": True,
             "message": "Login successful.",
