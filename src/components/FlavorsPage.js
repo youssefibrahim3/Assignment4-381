@@ -36,7 +36,6 @@ function FlavorsPage() {
             });
     }, [navigate]);
 
-    // This function handles the "Add to Order" logic
     const handleAddToOrder = (flavor) => {
         const userId = localStorage.getItem('userId');
         if (!userId) {
@@ -47,7 +46,6 @@ function FlavorsPage() {
         // Check if flavor is already in cart
         const existingItem = order.find(item => item.flavorId === flavor.id);
         if (existingItem) {
-            // Update quantity
             fetch(`${API_BASE}/cart`, {
                 method: 'PUT',
                 headers: {
@@ -153,7 +151,7 @@ function FlavorsPage() {
             if (data.success) {
                 setMessage("Order placed successfully!");
                 setMessageType("success");
-                setOrder([]); // Clear local cart
+                setOrder([]);
             } else {
                 setMessage(data.message);
                 setMessageType("error");
